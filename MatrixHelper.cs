@@ -12,7 +12,7 @@
         /// <param name="matrix">Matrix to print.</param>
         public void PrintMatrix<T>(T[,] matrix)
         {
-            if (Misc.CheckIsObjectNull(matrix, "матрица")) return;
+            if (Misc.PrintIfObjectNull(matrix, "матрица")) return;
 
             for (int i = 0; i < matrix.GetLength(0); i++)
             {
@@ -31,7 +31,7 @@
         /// <param name="x">Coordinate where to print.</param>
         public static void PrintMatrixCoord<T>(T[,] matrix, int x)
         {
-            if (Misc.CheckIsObjectNull(matrix, "матрица")) return;
+            if (Misc.PrintIfObjectNull(matrix, "матрица")) return;
 
             for (int i = 0; i < matrix.GetLength(0); i++)
             {

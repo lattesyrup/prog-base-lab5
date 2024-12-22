@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices; // for Stopwaich
+﻿using System.Diagnostics; // for Stopwaich
 
 namespace lab5
 {
@@ -30,7 +29,7 @@ namespace lab5
         /// <returns>sorted array of integers.</returns>
         public int[] BubbleSort()
         {
-            if (Misc.CheckIsObjectNull(this.Array, "массив")) return [];
+            if (Misc.PrintIfObjectNull(this.Array, "массив")) return [];
             int[] array = this.CopyArray(this.Array);
 
             bool isSorted = false;
@@ -54,7 +53,7 @@ namespace lab5
         /// <returns>sorted array of integers.</returns>
         public int[] ShakerSort()
         {
-            if (Misc.CheckIsObjectNull(this.Array, "массив")) return [];
+            if (Misc.PrintIfObjectNull(this.Array, "массив")) return [];
 
             int[] array = this.CopyArray(this.Array);
             int begin = 0, end = array.Length - 1;
@@ -111,7 +110,7 @@ namespace lab5
         /// <returns>a new array of integers.</returns>
         public int[] CopyArray(int[] arrOld)
         {
-            if (Misc.CheckIsObjectNull(arrOld, "массив")) return [];
+            if (Misc.PrintIfObjectNull(arrOld, "массив")) return [];
 
             int[] array = new int[arrOld.Length];
             for (int i = 0; i < arrOld.Length; i++)
@@ -127,7 +126,7 @@ namespace lab5
         /// <param name="textOut">Text to write before actual print.</param>
         public static void PrintArray<T>(T[] array, string textOut = "")
         {
-            if (Misc.CheckIsObjectNull(array, "массив")) return;
+            if (Misc.PrintIfObjectNull(array, "массив")) return;
 
             if (textOut != "") Console.WriteLine(textOut);
 
@@ -168,13 +167,12 @@ namespace lab5
         /// <summary>
         /// Gets desired array length.
         /// </summary>
-        /// <param name="textOut">Text to write before actual input.</param>
         /// <returns>an integer which is greater than 0.</returns>
-        public static int SetArrayLength(string textOut)
+        public static int SetArrayLength()
         {
             return InputHandler.Input<int>(
-                condition: (a) => (a >= 0),
-                textOut: textOut
+                condition: (a) => a > 0,
+                pattern: "укажи размер массива. (оставь 0 для вызова конструктора по умолчанию.)"
             );
         }
     }
