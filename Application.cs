@@ -3,11 +3,13 @@
     /// <summary>
     /// Holds some methods for menu
     /// </summary>
+    
     internal static class Application
     {
         /// <summary>
         /// Starts array sorting methods. Only for use in menu.
         /// </summary>
+        
         public static void StartArraySort()
         {
             Console.WriteLine("чтобы отсортировать массив,\nнужно сначала его создать.");
@@ -16,11 +18,11 @@
                 ? new()
                 : new(len);
 
-            var (arrayBubble, elapsedBubble) = arrHelper.SortArray(arrHelper.BubbleSort, "пузырьком");
-            var (arrayShaker, elapsedShaker) = arrHelper.SortArray(arrHelper.ShakerSort, "перемешиванием");
+            var (arrayBubble, elapsedBubble) = ArrayHelper.SortArray(arrHelper.BubbleSort, "пузырьком");
+            var (arrayShaker, elapsedShaker) = ArrayHelper.SortArray(arrHelper.ShakerSort, "перемешиванием");
 
-            arrHelper.PrintSortResults("пузырьком", elapsedBubble);
-            arrHelper.PrintSortResults("перемешиванием", elapsedShaker);
+            ArrayHelper.PrintSortResults("пузырьком", elapsedBubble);
+            ArrayHelper.PrintSortResults("перемешиванием", elapsedShaker);
 
             if (arrHelper.Length <= 10) // task condition
             {
@@ -48,6 +50,7 @@
         /// <summary>
         /// Prints author's deep gratitude. Only for use in menu.
         /// </summary>
+        
         public static void Credits()
         {
             Console.WriteLine("благодарю...");
@@ -62,6 +65,7 @@
         /// Returns whether user wants to exit the program.
         /// </summary>
         /// <returns><c>true</c> if user wants to exit; otherwise, <c>false</c>.</returns>
+        
         public static bool Exit()
         {
             string ans = InputHandler.Input<string>(

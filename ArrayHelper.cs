@@ -62,6 +62,7 @@ namespace lab5
         /// and sorts it using the shaker sort method.
         /// </summary>
         /// <returns>sorted array of integers.</returns>
+        
         public int[] ShakerSort()
         {
             if (Misc.PrintIfObjectNull(this.Array, "массив")) return [];
@@ -169,7 +170,8 @@ namespace lab5
         /// <param name="sortMethod">Sort function.</param>
         /// <param name="sortName">Sort method name to write.</param>
         /// <returns>a tuple (sorted array, elapsed time).</returns>
-        public (int[], TimeSpan) SortArray(Func<int[]> sortMethod, string sortName)
+        
+        public static (int[], TimeSpan) SortArray(Func<int[]> sortMethod, string sortName)
         {
             Console.WriteLine($"сортировка {sortName}...");
 
@@ -186,7 +188,8 @@ namespace lab5
         /// </summary>
         /// <param name="sortName">Sort method name to write.</param>
         /// <param name="elapsed">Time elapsed by the sort.</param>
-        public void PrintSortResults(string sortName, TimeSpan elapsed)
+        
+        public static void PrintSortResults(string sortName, TimeSpan elapsed)
         {
             Console.WriteLine($"\nвремя сортировки {sortName}: {elapsed:mm\\:ss\\.FFFFF}");
             Console.WriteLine($"тики сортировки {sortName}: {elapsed.Ticks}");
@@ -196,6 +199,7 @@ namespace lab5
         /// Gets desired array length.
         /// </summary>
         /// <returns>an integer which is greater than 0.</returns>
+        
         public static int SetArrayLength()
         {
             return InputHandler.Input<int>(

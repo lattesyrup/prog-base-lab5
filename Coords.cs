@@ -5,16 +5,19 @@ namespace lab5
     /// </summary>
     /// <param name="x">Row, the X cordinate.</param>
     /// <param name="y">Column, the Y coordinate.</param>
+    
     class Coords(int x = 0, int y = 0)
     {
         /// <summary>
         /// Row coordinate.
         /// </summary>
+        
         public int x = x;
         
         /// <summary>
         /// Column coordinate.
         /// </summary>
+        
         public int y = y;
 
         /// <summary>
@@ -23,6 +26,7 @@ namespace lab5
         /// </summary>
         /// <param name="n">One-dimenstional length of the field.</param>
         /// <returns><c>true</c> if there is a point, otherwise <c>false</c>.</returns>
+        
         public bool Exist(int n)
             => x >= 0 && y >= 0 && x < n && y < n;
         
@@ -61,6 +65,7 @@ namespace lab5
         /// any value originally supplied in result will be overwritten.
         /// </param>
         /// <returns><c>true</c> if the conversion is successful; otherwise, <c>false</c>.</returns>
+        
         public static bool TryParse(string input, out Coords coords)
         {
             coords = new();

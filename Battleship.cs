@@ -5,6 +5,7 @@ namespace lab5
     /// <summary>
     /// Battleship game class
     /// </summary>
+    
     internal static class Battleship
     {
         private const int SecondColumnCursorPosition = 14;
@@ -152,8 +153,8 @@ namespace lab5
 
         private static (Coords, bool) GetCoordsWithDirection(string pattern = "")
         {
-            Coords anchor = new();
-            bool buildShipToRight = default;
+            Coords anchor;
+            bool buildShipToRight;
             if (pattern != "") Console.WriteLine(pattern);
 
             do Console.Write(">> ");
