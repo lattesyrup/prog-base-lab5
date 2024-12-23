@@ -30,6 +30,22 @@
 
         private static bool TryParse<T>(string input, out T result)
         {
+            // Поиск метода TryParse у типа T
+            var method = typeof(T).GetMethod("TryParse", [typeof(string), typeof(T).MakeByRefType()]);
+
+            if (method != null)
+                try
+                {
+                    object[] parameters = [input, null];
+                    bool success = (bool)method.Invoke(null, parameters)!; // null, так как TryParse статический
+                    result = (T)parameters[1];
+                    return success;
+                }
+                catch (Exception)
+                {
+
+                }
+
             try
             {
                 result = (T)Convert.ChangeType(input, typeof(T));

@@ -1,22 +1,23 @@
-﻿namespace lab5
+﻿using System.Security.Cryptography;
+
+namespace lab5
 {
     /// <summary>
     /// Battleship game class
     /// </summary>
     internal static class Battleship
     {
-        private const int CursorLeftPosition = 14;
-
+        private const int SecondColumnCursorPosition = 14;
         private const int BoardSize = 5;
 
         enum CellState
         {
-            Unknown,
-            Ship1,
-            Ship2,
-            Ship3,
-            Kill,
-            Miss,
+            Unknown = ' ',
+            Ship1 = '1',
+            Ship2 = '2',
+            Ship3 = '3',
+            Kill = 'X',
+            Miss = '*',
         }
 
         enum ShipPlaceResult
@@ -28,41 +29,27 @@
             EdgeIsSurrounded
         }
 
-        private static char GetCellStateChar(CellState state)
-        {
-            return state switch
-            {
-                CellState.Unknown => '0',
-                CellState.Ship1 => '1',
-                CellState.Ship2 => '2',
-                CellState.Ship3 => '3',
-                CellState.Kill => 'X',
-                CellState.Miss => '*',
-                _ => throw new ArgumentOutOfRangeException("внутренняя ошибка: не существует state " + state.ToString())
-            };
-        }
-
         class Player
         {
             public CellState[,] shipsBoard = new CellState[BoardSize, BoardSize];
             public CellState[,] enemyBoard = new CellState[BoardSize, BoardSize];
 
-            public void PrintShips()
+            public void PrintShips(int cursorLeftPosition = 0)
             {
-                PrintField(shipsBoard);
+                PrintField(shipsBoard, cursorLeftPosition);
             }
 
-            public void PrintEnemy()
+            public void PrintEnemy(int cursorLeftPosition)
             {
-                PrintField(enemyBoard);
+                PrintField(enemyBoard, cursorLeftPosition);
             }
         }
 
-        private static void PrintField(CellState[,] field)
+        private static void PrintField(CellState[,] field, int cursorLeftPosition = 0)
         {
             // writing "  1 2 3 4 ..." line
 
-            Console.CursorLeft += 2;
+            Console.CursorLeft = cursorLeftPosition + 2;
             for (int i = 1; i <= BoardSize; i++)
                 Console.Write(i + " ");
             Console.WriteLine();
@@ -73,12 +60,21 @@
 
             for (int i = 0; i < BoardSize; i++)
             {
+                Console.CursorLeft = cursorLeftPosition;
                 Console.Write(Misc.Alphabet[i] + " ");
                 for (int j = 0; j < BoardSize; j++)
-                    Console.Write(GetCellStateChar(field[i, j]) + " ");
+                    Console.Write((char)field[i, j] + " ");
                 Console.WriteLine();
             }
             Console.WriteLine();
+        }
+
+        private static void PrintPlayer(Player player, string name, int cursorLeftPosition = 0)
+        {
+            Console.SetCursorPosition(cursorLeftPosition + 2, 0);
+            Console.WriteLine(name);
+            player.PrintShips(cursorLeftPosition);
+            player.PrintEnemy(cursorLeftPosition);
         }
 
         private static void PrintCoordsInputTutorial()
@@ -98,16 +94,15 @@
 
         private static bool TryParseCoords(string input, out Coords coords, out bool buildShipToRight)
         {
-            buildShipToRight = default;
-
-            if (!Coords.TryParse(
-                    input.AsSpan(0, 2).ToString(),
-                    out coords))
-    
-                return false;
-
             buildShipToRight = input.EndsWith('r');
-            return true;
+            if (input == "")
+            {
+                coords = new();
+                return false;
+            }
+            else return Coords.TryParse(
+                input.AsSpan(0, 2).ToString(),
+                out coords);
         }
 
         private static bool CheckAround(CellState[,] field, Coords coords)
@@ -119,7 +114,7 @@
                 for (int j = coords.y - 1; j <= coords.y + 1; j++)
                 {
                     Coords check = new(i, j);
-                    if (!check.Exist(BoardSize)) { }
+                    if (!check.Exist(BoardSize)) continue;
                     else if (field[check.x, check.y] != CellState.Unknown) return false;
                 }
             return true;
@@ -147,7 +142,7 @@
 
             while (!(anchor > edge))
             {
-                field[edge.x, edge.y] = (CellState)(shipType);
+                field[edge.x, edge.y] = (CellState)shipType;
                 if (buildShipToRight) edge.y--;
                 else edge.x--;
             }
@@ -155,7 +150,7 @@
             return ShipPlaceResult.Success;
         }
 
-        private static (Coords, bool) GetCoords(string pattern = "")
+        private static (Coords, bool) GetCoordsWithDirection(string pattern = "")
         {
             Coords anchor = new();
             bool buildShipToRight = default;
@@ -169,8 +164,6 @@
 
         private static void PrintPlaceResult(ShipPlaceResult placeResult)
         {
-            Console.CursorTop--;
-
             Console.WriteLine(placeResult switch
             {
                 ShipPlaceResult.Success => "полёт нормальный.",
@@ -186,14 +179,13 @@
 
         private static void ArrangeHumanShips(Player human)
         {
-            // i + 1 = ship.length
             for (int shipLength = 3; shipLength > 0;)
             {
                 Console.Clear();
                 human.PrintShips();
                 PrintCoordsInputTutorial();
                 PrintAnchorPointTutorial();
-                (Coords anchor, bool buildShipToRight) = GetCoords("итак, введи опорную точку корабля.");
+                (Coords anchor, bool buildShipToRight) = GetCoordsWithDirection("итак, введи опорную точку корабля.");
 
                 ShipPlaceResult placeResult = PlaceShip(human.shipsBoard, anchor, buildShipToRight, shipLength);
                 if (placeResult == ShipPlaceResult.Success) shipLength--;
@@ -211,12 +203,12 @@
         {
             Console.Clear();
             Random rnd = new();
-            for (int i = 2; i >= 0;)
+            for (int shipLength = 3; shipLength > 0;)
             {
-                Coords anchor = new(rnd.Next(BoardSize), rnd.Next(BoardSize));
+                Coords anchor = new( rnd.Next(BoardSize), rnd.Next(BoardSize) );
                 bool buildShipToRight = rnd.Next(2) == 1;
 
-                if (PlaceShip(ai.shipsBoard, anchor, buildShipToRight, i) == ShipPlaceResult.Success) i--;
+                if (PlaceShip(ai.shipsBoard, anchor, buildShipToRight, shipLength) == ShipPlaceResult.Success) shipLength--;
             }
 
             Console.Clear();
@@ -224,94 +216,69 @@
             Console.ReadKey();
         }
 
+        /// <summary>
+        /// Marks a cell with given coordinated as 'killed' or 'missed'.
+        /// </summary>
+        /// <param name="enemyBoard">Board with X's and *'s.</param>
+        /// <param name="checkBoard">Board with ships.</param>
+        /// <param name="coords">Given coordinates of the blasted cell.</param>
+        /// <returns><c>true</c> if killed, <c>false</c> if missed.</returns>
+        private static bool BlastCell(CellState[,] enemyBoard, CellState[,] checkBoard, Coords coords)
+        {
+            enemyBoard[coords.x, coords.y] = checkBoard[coords.x, coords.y] switch
+            {
+                CellState.Unknown => CellState.Miss,
+                CellState.Ship1 => CellState.Kill,
+                CellState.Ship2 => CellState.Kill,
+                CellState.Ship3 => CellState.Kill,
+            };
+            checkBoard[coords.x, coords.y] = enemyBoard[coords.x, coords.y];
+
+            if (enemyBoard[coords.x, coords.y] == CellState.Kill) return true;
+            return false;
+        }
+
         private static bool HumanTurn(Player human, Player ai)
         {
-            Coords coords = new();
-            string answer = "";
-            for (int i = 0; i < 3; i++)
+            Coords coords = InputHandler.Input<Coords>(pattern: "введи координаты.");
+
+            if (!coords.Exist(5))
             {
-                Console.CursorLeft = CursorLeftPosition;
-                new Action(i switch
-                {
-                    0 => new Action(() => Console.WriteLine("введи координаты.")),
-                    1 => new Action(() => answer = InputHandler.Input<string>()),
-                    2 => new Action(() => Console.CursorVisible = false)
-                }).Invoke();
-            }
+                Console.WriteLine("ты чево за границы вышел...");
+                return false;
+            }    
 
-            if (!TryParseCoords(answer, out coords, out bool buildShipRight))
-                Console.WriteLine($"кто-то не знает, как вводить координаты?");
-
-            else if (!coords.Exist(5))
-                    Console.WriteLine("ты чево за границы вышел...");
-
-            else if (human.enemyBoard[coords.x, coords.y] != CellState.Unknown)
+            if (human.enemyBoard[coords.x, coords.y] != CellState.Unknown)
+            {
                 Console.WriteLine("уже ходил сюда, держу в курсе.");
-
-            else
-            {
-                human.enemyBoard[coords.x, coords.y] = ai.shipsBoard[coords.x, coords.y] switch
-                {
-                    CellState.Unknown => CellState.Miss,
-                    CellState.Ship1 => CellState.Kill,
-                    CellState.Ship2 => CellState.Kill,
-                    CellState.Ship3 => CellState.Kill,
-                };
-                ai.shipsBoard[coords.x, coords.y] = human.enemyBoard[coords.x, coords.y];
-                Console.WriteLine(human.enemyBoard[coords.x, coords.y] switch
-                {
-                    CellState.Miss => "пу-пу-пу, промазал.",
-                    CellState.Kill => "ну куда-то попал. плюс ход."
-                });
-
-                if (human.enemyBoard[coords.x, coords.y] == CellState.Kill)
-                    return true;
+                return false;
             }
-            return false;
+
+            bool blastResult = BlastCell(human.enemyBoard, ai.shipsBoard, coords);
+
+            if (blastResult) Console.WriteLine("ну куда-то попал. плюс ход.");
+            else Console.WriteLine("пу-пу-пу, промазал.");
+
+            return blastResult;
         }
 
         private static bool AITurn(Player human, Player ai)
         {
-            Coords coords = new();
-            bool correctMove = false;
+            Coords coords;
+            Random rnd = new();
 
-            while (!correctMove)
-            {
-                Random rnd = new();
-                coords = new(rnd.Next(BoardSize), rnd.Next(BoardSize));
-                Console.CursorTop = 0;
-                for (int i = 0; i < 3; i++)
-                {
-                    Console.CursorLeft = CursorLeftPosition;
-                    new Action(i switch
-                    {
-                        0 => new Action(() => Console.WriteLine("ии вводит координаты...")),
-                        1 => new Action(() => Console.WriteLine($">> {coords}")),
-                        2 => new Action(() => Console.CursorVisible = false)
-                    }).Invoke();
-                }
+            do coords = new( rnd.Next(BoardSize), rnd.Next(BoardSize) );
+            while (!(ai.enemyBoard[coords.x, coords.y] == CellState.Unknown));
+                
+            Console.WriteLine("ии вводит координаты.");
+            Console.WriteLine($">> {coords}");
+            Thread.Sleep(200);
 
-                if (ai.enemyBoard[coords.x, coords.y] == CellState.Unknown)
-                {
-                    ai.enemyBoard[coords.x, coords.y] = human.shipsBoard[coords.x, coords.y] switch
-                    {
-                        CellState.Unknown => CellState.Miss,
-                        CellState.Ship1 => CellState.Kill,
-                        CellState.Ship2 => CellState.Kill,
-                        CellState.Ship3 => CellState.Kill
-                    };
-                    human.shipsBoard[coords.x, coords.y] = ai.enemyBoard[coords.x, coords.y];
-                    Console.WriteLine(ai.enemyBoard[coords.x, coords.y] switch
-                    {
-                        CellState.Miss => "пу-пу-пу, промазал...",
-                        CellState.Kill => "ура, попал! плюс ход!"
-                    });
-                    correctMove = true;
-                }
-            }
-            if (ai.enemyBoard[coords.x, coords.y] == CellState.Kill)
-                return true;
-            return false;
+            bool blastResult = BlastCell(ai.enemyBoard, human.shipsBoard, coords);
+            if (blastResult) Console.WriteLine("ура, попал! плюс ход!");
+            else Console.WriteLine("пу-пу-пу, промазал...");
+
+            return blastResult;
         }
 
         private static bool CheckWin(Player human, Player ai)
@@ -323,13 +290,10 @@
                 for (int j = 0; j < BoardSize && (AIDefeated || HumanDefeated); j++)
                 {
                     if (shipInts.Contains((int)ai.shipsBoard[i, j]))
-                    {
                         AIDefeated = false;
-                    }
+                    
                     if (shipInts.Contains((int)human.shipsBoard[i, j]))
-                    {
                         HumanDefeated = false;
-                    }
                 }
 
             if (AIDefeated || HumanDefeated)
@@ -347,13 +311,8 @@
             {
                 Console.Clear();
                 Console.CursorVisible = true;
-                human.PrintShips();
-                human.PrintEnemy();
-                if (debug)
-                {
-                    ai.PrintShips();
-                    ai.PrintEnemy();
-                }
+                PrintPlayer(human, "чел (ты)");
+                if (debug) PrintPlayer(ai, "комп (ии)", SecondColumnCursorPosition);
 
                 if (first)
                 {
@@ -361,8 +320,6 @@
                     if (answer == "debug") debug = true;
                     first = false;
                 }
-
-                Console.SetCursorPosition(CursorLeftPosition, 0);
 
                 if (humanPlays)
                     switchMove = !HumanTurn(human, ai);
@@ -411,12 +368,3 @@
         }
     }
 }
-
-/*
-
-todo:
-- HumanTurn: big while, not okay
-- AITurn: big while, not okay
-- PlayGame: big while, not okay
-
-*/

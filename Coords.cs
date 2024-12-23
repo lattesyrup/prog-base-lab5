@@ -24,7 +24,7 @@ namespace lab5
         /// <param name="n">One-dimenstional length of the field.</param>
         /// <returns><c>true</c> if there is a point, otherwise <c>false</c>.</returns>
         public bool Exist(int n)
-            => x > 0 && y > 0 && x < n && y < n;
+            => x >= 0 && y >= 0 && x < n && y < n;
         
         /// <summary>
         /// Creates a full copy of given coordinates.
@@ -55,7 +55,7 @@ namespace lab5
         /// <param name="input">A string with coordinates.</param>
         /// <param name="coords">
         /// An object of Coords class containing pair of coordinates if succeeded,
-        /// or a new instance od Coords class (0, 0) if failed.
+        /// or a new instance of Coords class <c>(0, 0)</c> if failed.
         /// 
         /// This parameter is passed uninitialized;
         /// any value originally supplied in result will be overwritten.
@@ -80,6 +80,11 @@ namespace lab5
             return true;
         }
 
+        /// <summary>
+        /// Returns a string that represents the current object:
+        /// <c>(0, 12) -> a13</c> for example.
+        /// </summary>
+        /// <returns>a string that represents the current object.</returns>
         public override string ToString()
             => CoordsHelper.NumberToChar(this.x).ToString() + (this.y + 1).ToString();
     }
