@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices; // for Stopwaich
+﻿using System.Diagnostics; // for Stopwaich
 
 namespace lab5
 {
@@ -7,20 +6,30 @@ namespace lab5
     /// Array helper class
     /// </summary>
     /// <param name="len"></param>
+    
     internal class ArrayHelper(int len = 10)
     {
         /// <summary>
         /// Length of the array
         /// </summary>
+        
         public int Length { get; } = len;
+        
         /// <summary>
         /// Generated array
         /// </summary>
+        
         public int[] Array { get; } = FillArrayRandom(len);
         
-        private void SwapInArray(int x, int y)
+        /// <summary>
+        /// Constant for use in <see cref="FillArrayRandom(int)"/>.
+        /// </summary>
+
+        private const int RandomCap = 300;        
+
+        private static void SwapInArray(int[] arr, int x, int y)
         {
-            (this.Array[x], this.Array[y]) = (this.Array[y], this.Array[x]);
+            (arr[x], arr[y]) = (arr[y], arr[x]);
         }
 
         /// <summary>
@@ -28,11 +37,12 @@ namespace lab5
         /// and sorts it using the bubble sort method.
         /// </summary>
         /// <returns>sorted array of integers.</returns>
+
         public int[] BubbleSort()
         {
-            if (Misc.CheckIsObjectNull(this.Array, "массив")) return [];
-            int[] array = this.CopyArray(this.Array);
+            if (Misc.PrintIfObjectNull(this.Array, "массив")) return [];
 
+            int[] array = this.CopyArray();
             bool isSorted = false;
             for (int i = array.Length - 1; i > 0 && !isSorted; i--)
             {
@@ -41,7 +51,7 @@ namespace lab5
                     if (array[j] > array[j + 1])
                     {
                         isSorted = false;
-                        this.SwapInArray(j, j + 1);
+                        SwapInArray(array, j, j + 1);
                     }
             }
             return array;
@@ -52,13 +62,15 @@ namespace lab5
         /// and sorts it using the shaker sort method.
         /// </summary>
         /// <returns>sorted array of integers.</returns>
+        
         public int[] ShakerSort()
         {
-            if (Misc.CheckIsObjectNull(this.Array, "массив")) return [];
+            if (Misc.PrintIfObjectNull(this.Array, "массив")) return [];
 
-            int[] array = this.CopyArray(this.Array);
+            int[] array = this.CopyArray();
             int begin = 0, end = array.Length - 1;
-            bool leftToRight = true, isSorted = false;
+            bool leftToRight = true;
+            bool isSorted = false;
 
             while (begin != end && !isSorted)
             {
@@ -69,7 +81,7 @@ namespace lab5
                         if (array[i] > array[i + 1])
                         {
                             isSorted = false;
-                            this.SwapInArray(i, i + 1);
+                            SwapInArray(array, i, i + 1);
                         }
                     end--;
                 }
@@ -79,7 +91,7 @@ namespace lab5
                         if (array[i] < array[i - 1])
                         {
                             isSorted = false;
-                            this.SwapInArray(i, i - 1);
+                            SwapInArray(array, i, i - 1);
                         }
                     begin++;
                 }
@@ -95,12 +107,13 @@ namespace lab5
         /// </summary>
         /// <param name="n">Length for the array to create.</param>
         /// <returns>an array of integers.</returns>
+        
         public static int[] FillArrayRandom(int n)
         {
             int[] array = new int[n];
             Random rnd = new();
             for (int i = 0; i < n; i++)
-                array[i] = rnd.Next(300);
+                array[i] = rnd.Next(RandomCap);
             return array;
         }
 
@@ -109,9 +122,10 @@ namespace lab5
         /// </summary>
         /// <param name="arrOld">Array to copy.</param>
         /// <returns>a new array of integers.</returns>
-        public int[] CopyArray(int[] arrOld)
+        
+        public static int[] CopyArray(int[] arrOld)
         {
-            if (Misc.CheckIsObjectNull(arrOld, "массив")) return [];
+            if (Misc.PrintIfObjectNull(arrOld, "массив")) return [];
 
             int[] array = new int[arrOld.Length];
             for (int i = 0; i < arrOld.Length; i++)
@@ -120,16 +134,28 @@ namespace lab5
         }
 
         /// <summary>
+        /// Copies its own array.
+        /// </summary>
+        /// <returns>a new array of integers.</returns>
+        public int[] CopyArray()
+        {
+            int[] array = new int[this.Length];
+            for (int i = 0; i < this.Length; i++)
+                array[i] = this.Array[i];
+            return array;
+        }
+
+        /// <summary>
         /// Prints an array of type T.
         /// </summary>
         /// <typeparam name="T">Type of elements of the array.</typeparam>
         /// <param name="array">Array to print.</param>
-        /// <param name="textOut">Text to write before actual print.</param>
-        public static void PrintArray<T>(T[] array, string textOut = "")
+        /// <param name="pattern">Text to write before actual print.</param>
+        public static void PrintArray<T>(T[] array, string pattern = "")
         {
-            if (Misc.CheckIsObjectNull(array, "массив")) return;
+            if (Misc.PrintIfObjectNull(array, "массив")) return;
 
-            if (textOut != "") Console.WriteLine(textOut);
+            if (pattern != "") Console.WriteLine(pattern);
 
             for (int i = 0; i < array.Length; i++)
                 Console.Write($"{array[i]}\t");
@@ -139,11 +165,13 @@ namespace lab5
         /// <summary>
         /// Returns an array sorted by desired sort method
         /// and time elapsed by this sort method.
+        /// Only for use in <see cref="Application.StartArraySort"/>.
         /// </summary>
         /// <param name="sortMethod">Sort function.</param>
         /// <param name="sortName">Sort method name to write.</param>
         /// <returns>a tuple (sorted array, elapsed time).</returns>
-        public (int[], TimeSpan) SortArray(Func<int[]> sortMethod, string sortName)
+        
+        public static (int[], TimeSpan) SortArray(Func<int[]> sortMethod, string sortName)
         {
             Console.WriteLine($"сортировка {sortName}...");
 
@@ -156,10 +184,12 @@ namespace lab5
 
         /// <summary>
         /// Prints time and ticks elapsed by a sort.
+        /// Only for use in <see cref="Application.StartArraySort"/>.
         /// </summary>
         /// <param name="sortName">Sort method name to write.</param>
         /// <param name="elapsed">Time elapsed by the sort.</param>
-        public void PrintSortResults(string sortName, TimeSpan elapsed)
+        
+        public static void PrintSortResults(string sortName, TimeSpan elapsed)
         {
             Console.WriteLine($"\nвремя сортировки {sortName}: {elapsed:mm\\:ss\\.FFFFF}");
             Console.WriteLine($"тики сортировки {sortName}: {elapsed.Ticks}");
@@ -168,13 +198,13 @@ namespace lab5
         /// <summary>
         /// Gets desired array length.
         /// </summary>
-        /// <param name="textOut">Text to write before actual input.</param>
         /// <returns>an integer which is greater than 0.</returns>
-        public static int SetArrayLength(string textOut)
+        
+        public static int SetArrayLength()
         {
             return InputHandler.Input<int>(
-                condition: (a) => (a >= 0),
-                textOut: textOut
+                condition: (a) => a >= 0,
+                pattern: "укажи размер массива. (оставь 0 для вызова конструктора по умолчанию.)"
             );
         }
     }

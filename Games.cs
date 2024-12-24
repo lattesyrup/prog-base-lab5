@@ -2,56 +2,11 @@
 
 namespace lab5  
 {
-    enum Difficulty
-    {
-        Easy,
-        Hard
-    };
-
-    /// <summary>
-    /// Difficulty choose handler class
-    /// </summary>
-    internal static class DifficultyChoose
-    {
-        private static readonly Dictionary<int, (Difficulty, string)> _difficulties = new()
-        {
-            { 1, (Difficulty.Easy, "x) 1 - лёгкая") },
-            { 2, (Difficulty.Hard, "x) 2 - сложная") }
-        };
-
-        /// <summary>
-        /// Gets desired difficulty.
-        /// </summary>
-        /// <returns>a difficulty.</returns>
-        public static Difficulty Choose()
-        {
-            Console.WriteLine("выбор сложности.");
-            foreach (int key in _difficulties.Keys)
-            {
-                Console.WriteLine(_difficulties[key].Item2);
-            }
-            Console.WriteLine("осторожно: лучше выбрать лёгкую сложность!");
-
-            Difficulty difficulty = InputHandler.Input<int>(
-                (x) => (_difficulties.ContainsKey(x)),
-                "что выберешь ты?"
-            ) switch
-            {
-                1 => Difficulty.Easy,
-                2 => Difficulty.Hard,
-            };
-
-            return difficulty;
-        }
-    }
-
     /// <summary>
     /// Math games class
     /// </summary>
     internal static class MathGuessing
     {
-        private static Difficulty _difficulty;
-
         private static int Attempt(Random rnd, int randomCap)
         {
             string opr = rnd.Next(3) switch
@@ -59,18 +14,20 @@ namespace lab5
                 0 => "+",
                 1 => "-",
                 2 => "*",
+                _ => "+"
             };
 
             if (opr == "*") randomCap /= 3;
             int a = rnd.Next(randomCap / 3, randomCap), b = rnd.Next(randomCap);
             if (opr == "*") randomCap *= 3;
 
-            int ans = InputHandler.Input<int>(textOut: $"{a} {opr} {b} = ??");
+            int ans = InputHandler.Input<int>(pattern: $"{a} {opr} {b} = ??");
             int res = opr switch
             {
                 "+" => a + b,
                 "-" => a - b,
                 "*" => a * b,
+                _ => a + b
             };
 
             if (res == ans)
@@ -79,7 +36,7 @@ namespace lab5
                 {
                     0 => "ага.",
                     1 => "правильно.",
-                    2 => "неплохо.",
+                    _ => "неплохо.",
                 });
                 return 1;
             }
@@ -88,7 +45,7 @@ namespace lab5
                 Console.Write(rnd.Next(2) switch
                 {
                     0 => "ну не.",
-                    1 => "неправильно.",
+                    _ => "неправильно.",
                 });
                 Console.WriteLine($" правильно: {res}.");
                 return 0;
@@ -100,32 +57,36 @@ namespace lab5
         /// </summary>
         public static void PlayMath()
         {
-            _difficulty = DifficultyChoose.Choose();
+            const int RoundsEasy = 3, RandomCapEasy = 15;
+            const int RoundsHard = 7, RandomCapHard = 45;
 
-            int attempts, randomCap;
-            (attempts, randomCap) = _difficulty switch
-            {
-                Difficulty.Easy => (3, 15),
-                Difficulty.Hard => (7, 45),
-                _ => (0, 0)
-            };
+            bool isChosenDifficultyHard = InputHandler.Input<int>(
+                condition: (x) => (x == 0 || x == 1),
+                pattern: "выбирай сложность: лёгкая (0) или сложная (1)."
+            ) == 1;
+
+            int rounds, randomCap;
+            if (isChosenDifficultyHard)
+                (rounds, randomCap) = (RoundsHard, RandomCapHard);
+            else
+                (rounds, randomCap) = (RoundsEasy, RandomCapEasy);
 
             Random rnd = new();
-            int attemptsRight = 0;
-            for (int i = 1; i <= attempts; i++)
+            int roundsRight = 0;
+            for (int i = 1; i <= rounds; i++)
             {
                 Console.Clear();
                 Console.WriteLine("несколько раундов, в каждом - мат.выражение,");
                 Console.WriteLine("на которое нужно напечатать правильный ответ.");
 
-                Console.WriteLine($"\nРаунд {i}/{attempts}.");
-                attemptsRight += Attempt(rnd, randomCap);
+                Console.WriteLine($"\nРаунд {i}/{rounds}.");
+                roundsRight += Attempt(rnd, randomCap);
                 Thread.Sleep(700);
             }
 
             Console.Clear();
-            Console.WriteLine($"\nу тебя {attemptsRight}/{attempts} правильных ответов.");
-            if (attemptsRight == attempts) Console.WriteLine("можешь собой гордиться.");
+            Console.WriteLine($"\nу тебя {roundsRight}/{rounds} правильных ответов.");
+            if (roundsRight == rounds) Console.WriteLine("можешь собой гордиться.");
             Console.ReadKey();
         }
 
@@ -144,10 +105,13 @@ namespace lab5
 
         /* 
         
-        /// ошибка прошлого (изучение гиммика out)
+        /// ошибка прошлого (изучение гиммика out).
         /// хотя почему ошибка. TryParse так-то также работает.
         /// проблема больше в том, что это служебная функция,
         /// не связанная с выводом.
+        /// 
+        /// а ещё здесь используется using static System.Console. фи.
+        
         private static bool formula2(double a, double b, out double res)
         {
             bool flagLog = (b > 0);
